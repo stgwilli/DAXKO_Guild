@@ -12,7 +12,7 @@ namespace Daxko.Guild.Domain.Tests.Domain
         {
         }
 
-        public class concerns_for_searching_with_2_contacts: concern
+        public class concerns_for_searching: concern
         {
             context c = () =>
                 {
@@ -82,14 +82,11 @@ namespace Daxko.Guild.Domain.Tests.Domain
         }
 
         [Concern(typeof (AddressBook))]
-        public class when_searching_for_a_contact_based_on_name : concerns_for_searching_with_2_contacts
+        public class when_searching_for_a_contact_based_on_name : concerns_for_searching
         {
             because b = () =>
                 {
-                    found_contacts = sut
-                        .all_contacts()
-                        .that_match(x=>x.name.Equals("adam")
-                        .or(x=>x.name.Equals("steven")));
+                    found_contacts = sut.all_contacts().that_match(Where<Contact>(x => x.name).equal_to("adam"));
                 };
 
             it should_return_the_contact_with_the_specified_name = () =>
@@ -99,5 +96,26 @@ namespace Daxko.Guild.Domain.Tests.Domain
 
             static IEnumerable<Contact> found_contacts;
         }
+
+        [Concern(typeof (AddressBook))]
+        public class when_searching_for_contacts_using_a_predicate : concerns_for_searching
+        {
+            context c = () =>
+                {
+                };
+
+            because b = () =>
+                {
+                    found_contacts = sut.all_contacts().that_match(x => x.name.Equals("adam"));
+                };
+
+            it should_return_the_contacts_that_meet_the_predicate = () =>
+                {
+                    found_contacts.should_contain(adam);
+                };
+
+            static IEnumerable<Contact> found_contacts;
+        }
+
     }
 }
