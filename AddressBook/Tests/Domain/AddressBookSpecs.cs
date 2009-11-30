@@ -1,7 +1,8 @@
- using System.Collections.Generic;
- using developwithpassion.bdd.contexts;
- using developwithpassion.bdd.harnesses.mbunit;
- using developwithpassion.bdddoc.core;
+using System.Collections.Generic;
+using Daxko.Guild.Domain.extensions;
+using developwithpassion.bdd.contexts;
+using developwithpassion.bdd.harnesses.mbunit;
+using developwithpassion.bdddoc.core;
 
 namespace Daxko.Guild.Domain.Tests.Domain
 {
@@ -9,6 +10,22 @@ namespace Daxko.Guild.Domain.Tests.Domain
     {
         public abstract class concern : observations_for_a_sut_without_a_contract<AddressBook>
         {
+        }
+
+        public class concerns_for_searching_with_2_contacts: concern
+        {
+            context c = () =>
+                {
+                    steven = new Contact(){name = "steven"};
+                    adam = new Contact(){name = "adam"};
+
+                    contacts = new List<Contact>() { adam, steven };
+                    provide_a_basic_sut_constructor_argument(contacts);
+                };
+
+            protected static Contact steven;
+            protected static Contact adam;
+            protected static IList<Contact> contacts;
         }
 
         [Concern(typeof(AddressBook))]
@@ -37,7 +54,7 @@ namespace Daxko.Guild.Domain.Tests.Domain
         }
 
         [Concern(typeof(AddressBook))]
-        public class when_asking_for_all_movies : concern
+        public class when_asking_for_all_contacts : concern
         {
             context c = () =>
                 {
@@ -53,7 +70,7 @@ namespace Daxko.Guild.Domain.Tests.Domain
                     result = sut.all_contacts();
                 };
 
-            it should_return_a_set_of_all_movies_in_the_address_book = () =>
+            it should_return_a_set_of_all_contacts_in_the_address_book = () =>
                 {
                     result.should_contain(steven, some_other_guy);
                 };
@@ -62,6 +79,25 @@ namespace Daxko.Guild.Domain.Tests.Domain
             static IList<Contact> contacts;
             static Contact steven;
             static Contact some_other_guy;
-        } 
+        }
+
+        [Concern(typeof (AddressBook))]
+        public class when_searching_for_a_contact_based_on_name : concerns_for_searching_with_2_contacts
+        {
+            because b = () =>
+                {
+                    found_contacts = sut
+                        .all_contacts()
+                        .that_match(x=>x.name.Equals("adam")
+                        .or(x=>x.name.Equals("steven")));
+                };
+
+            it should_return_the_contact_with_the_specified_name = () =>
+                {
+                    found_contacts.should_contain(adam);
+                };
+
+            static IEnumerable<Contact> found_contacts;
+        }
     }
 }
