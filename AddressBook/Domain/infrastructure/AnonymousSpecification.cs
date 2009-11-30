@@ -1,5 +1,4 @@
 using System;
-using Daxko.Guild.Domain.extensions;
 
 namespace Daxko.Guild.Domain.infrastructure
 {
